@@ -8,6 +8,7 @@ const { Toolkit } = require("actions-toolkit");
 const GH_USERNAME = core.getInput("GH_USERNAME");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
 const MAX_LINES = core.getInput("MAX_LINES");
+const FILE_NAME = core.getInput("FILE_NAME") || "README.md";
 /**
  * Returns the sentence case representation
  * @param {String} str - the string
@@ -120,7 +121,7 @@ Toolkit.run(
       // Call the serializer to construct a string
       .map((item) => serializers[item.type](item));
 
-    const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
+    const readmeContent = fs.readFileSync(`./${FILE_NAME}`, "utf-8").split("\n");
 
     // Find the index corresponding to <!--START_SECTION:activity--> comment
     let startIdx = readmeContent.findIndex(
@@ -162,7 +163,7 @@ Toolkit.run(
       );
 
       // Update README
-      fs.writeFileSync("./README.md", readmeContent.join("\n"));
+      fs.writeFileSync(`./${FILE_NAME}`, readmeContent.join("\n"));
 
       // Commit to the remote repository
       try {
@@ -171,7 +172,7 @@ Toolkit.run(
         tools.log.debug("Something went wrong");
         return tools.exit.failure(err);
       }
-      tools.exit.success("Wrote to README");
+      tools.exit.success(`Wrote to ${FILE_NAME}`);
     }
 
     const oldContent = readmeContent.slice(startIdx + 1, endIdx).join("\n");
@@ -209,11 +210,11 @@ Toolkit.run(
           count++;
         }
       });
-      tools.log.success("Updated README with the recent activity");
+      tools.log.success(`Updated ${`${FILE_NAME}`} with the recent activity`);
     }
 
     // Update README
-    fs.writeFileSync("./README.md", readmeContent.join("\n"));
+    fs.writeFileSync(`./${FILE_NAME}`, readmeContent.join("\n"));
 
     // Commit to the remote repository
     try {
