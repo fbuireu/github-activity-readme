@@ -1,6 +1,11 @@
-# GitHub Activity in Readme
+# GitHub Activity 
+You’re now entering a forked repository. At some point, I must have helped out or maybe I fixed part of its source code or contributed in other ways. The repository is now archived, read at your own risk.
 
-Updates `README.md` with the recent GitHub activity of a user.
+
+
+<details>
+  <summary>Find below the original README.md</summary>
+  Updates `README.md` with the recent GitHub activity of a user.
 
 <img width="735" alt="profile-repo" src="https://user-images.githubusercontent.com/25279263/87703301-3aa4a500-c7b8-11ea-8eb6-245121997a7b.png">
 
@@ -78,3 +83,5 @@ jobs:
 ```
 
 _Inspired by [JasonEtco/activity-box](https://github.com/JasonEtco/activity-box)_
+</details>
+
