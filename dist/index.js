@@ -1338,6 +1338,32 @@ function parseJson (txt, reviver, context) {
 
 /***/ }),
 
+/***/ 82:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Sanitizes an input into a string so it can be passed into issueCommand safely
+ * @param input input to sanitize into a string
+ */
+function toCommandValue(input) {
+    if (input === null || input === undefined) {
+        return '';
+    }
+    else if (typeof input === 'string' || input instanceof String) {
+        return input;
+    }
+    return JSON.stringify(input);
+}
+exports.toCommandValue = toCommandValue;
+//# sourceMappingURL=utils.js.map
+
+/***/ }),
+
 /***/ 87:
 /***/ (function(module) {
 
@@ -1470,6 +1496,42 @@ function legacy (fs) {
 
 /***/ }),
 
+/***/ 102:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+// For internal use, subject to change.
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const fs = __importStar(__webpack_require__(747));
+const os = __importStar(__webpack_require__(87));
+const utils_1 = __webpack_require__(82);
+function issueCommand(command, message) {
+    const filePath = process.env[`GITHUB_${command}`];
+    if (!filePath) {
+        throw new Error(`Unable to find environment variable for file command ${command}`);
+    }
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`Missing file at path: ${filePath}`);
+    }
+    fs.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os.EOL}`, {
+        encoding: 'utf8'
+    });
+}
+exports.issueCommand = issueCommand;
+//# sourceMappingURL=file-command.js.map
+
+/***/ }),
+
 /***/ 104:
 /***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
@@ -1531,7 +1593,7 @@ const exec = (cmd, args = []) =>
       if (code !== 0 && !stdout.includes("nothing to commit")) {
         err = new Error(`Invalid status code: ${code}`);
         err.code = code;
-        return reject(err);
+        return reject(err)
       }
       return resolve(code);
     });
@@ -1597,7 +1659,9 @@ Toolkit.run(
       // Call the serializer to construct a string
       .map((item) => serializers[item.type](item));
 
-    const readmeContent = fs.readFileSync(`./${TARGET_FILE}`, "utf-8").split("\n");
+    const readmeContent = fs
+      .readFileSync(`./${TARGET_FILE}`, "utf-8")
+      .split("\n");
 
     // Find the index corresponding to <!--START_SECTION:activity--> comment
     let startIdx = readmeContent.findIndex(
@@ -1638,8 +1702,8 @@ Toolkit.run(
         "<!--END_SECTION:activity-->"
       );
 
-      // Update README
-      fs.writeFileSync(TARGET_FILE, readmeContent.join("\n"));
+      // Update TARGET_FILE
+      fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
 
       // Commit to the remote repository
       try {
@@ -1648,7 +1712,7 @@ Toolkit.run(
         tools.log.debug("Something went wrong");
         return tools.exit.failure(err);
       }
-      tools.exit.success("Wrote to README");
+      tools.exit.success(`Wrote to ${TARGET_FILE}`);
     }
 
     const oldContent = readmeContent.slice(startIdx + 1, endIdx).join("\n");
@@ -1671,7 +1735,7 @@ Toolkit.run(
         }
         readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`);
       });
-      tools.log.success("Wrote to README");
+      tools.log.success(`Wrote to ${TARGET_FILE}`);
     } else {
       // It is likely that a newline is inserted after the <!--START_SECTION:activity--> comment (code formatter)
       let count = 0;
@@ -1686,10 +1750,10 @@ Toolkit.run(
           count++;
         }
       });
-      tools.log.success("Updated README with the recent activity");
+      tools.log.success(`Updated ${TARGET_FILE} with the recent activity`);
     }
 
-    // Update README
+    // Update TARGET FILE
     fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
 
     // Commit to the remote repository
@@ -2761,12 +2825,10 @@ var conversions = __webpack_require__(600);
 
 /*
 	this function routes a model to all other models.
-
 	all functions that are routed have a property `.conversion` attached
 	to the returned synthetic function. This property is an array
 	of strings, each with the steps in between the 'from' and 'to'
 	color models (inclusive).
-
 	conversions that are not possible simply are not included.
 */
 
@@ -5347,6 +5409,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const os = __importStar(__webpack_require__(87));
+const utils_1 = __webpack_require__(82);
 /**
  * Commands
  *
@@ -5400,28 +5463,14 @@ class Command {
         return cmdStr;
     }
 }
-/**
- * Sanitizes an input into a string so it can be passed into issueCommand safely
- * @param input input to sanitize into a string
- */
-function toCommandValue(input) {
-    if (input === null || input === undefined) {
-        return '';
-    }
-    else if (typeof input === 'string' || input instanceof String) {
-        return input;
-    }
-    return JSON.stringify(input);
-}
-exports.toCommandValue = toCommandValue;
 function escapeData(s) {
-    return toCommandValue(s)
+    return utils_1.toCommandValue(s)
         .replace(/%/g, '%25')
         .replace(/\r/g, '%0D')
         .replace(/\n/g, '%0A');
 }
 function escapeProperty(s) {
-    return toCommandValue(s)
+    return utils_1.toCommandValue(s)
         .replace(/%/g, '%25')
         .replace(/\r/g, '%0D')
         .replace(/\n/g, '%0A')
@@ -6175,6 +6224,12 @@ function convertBody(buffer, headers) {
 	// html4
 	if (!res && str) {
 		res = /<meta[\s]+?http-equiv=(['"])content-type\1[\s]+?content=(['"])(.+?)\2/i.exec(str);
+		if (!res) {
+			res = /<meta[\s]+?content=(['"])(.+?)\1[\s]+?http-equiv=(['"])content-type\3/i.exec(str);
+			if (res) {
+				res.pop(); // drop last quote
+			}
+		}
 
 		if (res) {
 			res = /charset=(.*)/i.exec(res.pop());
@@ -7182,7 +7237,7 @@ function fetch(url, opts) {
 				// HTTP fetch step 5.5
 				switch (request.redirect) {
 					case 'error':
-						reject(new FetchError(`redirect mode is set to error: ${request.url}`, 'no-redirect'));
+						reject(new FetchError(`uri requested responds with a redirect, redirect mode is set to error: ${request.url}`, 'no-redirect'));
 						finalize();
 						return;
 					case 'manual':
@@ -7221,7 +7276,8 @@ function fetch(url, opts) {
 							method: request.method,
 							body: request.body,
 							signal: request.signal,
-							timeout: request.timeout
+							timeout: request.timeout,
+							size: request.size
 						};
 
 						// HTTP-redirect fetch step 9
@@ -7540,7 +7596,7 @@ var Toolkit = /** @class */ (function () {
      * Gets the contents of a file in your project's workspace
      *
      * ```js
-     * const myFile = tools.readFile(TARGET_FILE)
+     * const myFile = tools.readFile()
      * ```
      *
      * @param filename - Name of the file
@@ -7837,6 +7893,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const command_1 = __webpack_require__(431);
+const file_command_1 = __webpack_require__(102);
+const utils_1 = __webpack_require__(82);
 const os = __importStar(__webpack_require__(87));
 const path = __importStar(__webpack_require__(622));
 /**
@@ -7863,9 +7921,17 @@ var ExitCode;
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function exportVariable(name, val) {
-    const convertedVal = command_1.toCommandValue(val);
+    const convertedVal = utils_1.toCommandValue(val);
     process.env[name] = convertedVal;
-    command_1.issueCommand('set-env', { name }, convertedVal);
+    const filePath = process.env['GITHUB_ENV'] || '';
+    if (filePath) {
+        const delimiter = '_GitHubActionsFileCommandDelimeter_';
+        const commandValue = `${name}<<${delimiter}${os.EOL}${convertedVal}${os.EOL}${delimiter}`;
+        file_command_1.issueCommand('ENV', commandValue);
+    }
+    else {
+        command_1.issueCommand('set-env', { name }, convertedVal);
+    }
 }
 exports.exportVariable = exportVariable;
 /**
@@ -7881,7 +7947,13 @@ exports.setSecret = setSecret;
  * @param inputPath
  */
 function addPath(inputPath) {
-    command_1.issueCommand('add-path', {}, inputPath);
+    const filePath = process.env['GITHUB_PATH'] || '';
+    if (filePath) {
+        file_command_1.issueCommand('PATH', inputPath);
+    }
+    else {
+        command_1.issueCommand('add-path', {}, inputPath);
+    }
     process.env['PATH'] = `${inputPath}${path.delimiter}${process.env['PATH']}`;
 }
 exports.addPath = addPath;
@@ -15327,7 +15399,7 @@ module.exports = options => {
 /***/ 969:
 /***/ (function(module) {
 
-module.exports = {"_from":"signale@^1.4.0","_id":"signale@1.4.0","_inBundle":false,"_integrity":"sha512-iuh+gPf28RkltuJC7W5MRi6XAjTDCAPC/prJUpQoG4vIP3MJZ+GTydVnodXA7pwvTKb2cA0m9OFZW/cdWy/I/w==","_location":"/signale","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"signale@^1.4.0","name":"signale","escapedName":"signale","rawSpec":"^1.4.0","saveSpec":null,"fetchSpec":"^1.4.0"},"_requiredBy":["/actions-toolkit"],"_resolved":"https://registry.npmjs.org/signale/-/signale-1.4.0.tgz","_shasum":"c4be58302fb0262ac00fc3d886a7c113759042f1","_spec":"signale@^1.4.0","_where":"/Users/jamesgeorge007/CodeSpace/scripting/JavaScript/GitHub-Actions/github-activity-readme/node_modules/actions-toolkit","author":{"name":"Klaus Sinani","email":"klaussinani@gmail.com","url":"https://klaussinani.github.io"},"bugs":{"url":"https://github.com/klaussinani/signale/issues"},"bundleDependencies":false,"dependencies":{"chalk":"^2.3.2","figures":"^2.0.0","pkg-conf":"^2.1.0"},"deprecated":false,"description":"👋 Hackable console logger","devDependencies":{"xo":"*"},"engines":{"node":">=6"},"files":["index.js","signale.js","types.js"],"homepage":"https://github.com/klaussinani/signale#readme","keywords":["hackable","colorful","console","logger"],"license":"MIT","maintainers":[{"name":"Mario Sinani","email":"mariosinani@protonmail.ch","url":"https://mariocfhq.github.io"}],"name":"signale","options":{"default":{"displayScope":true,"displayBadge":true,"displayDate":false,"displayFilename":false,"displayLabel":true,"displayTimestamp":false,"underlineLabel":true,"underlineMessage":false,"underlinePrefix":false,"underlineSuffix":false,"uppercaseLabel":false}},"repository":{"type":"git","url":"git+https://github.com/klaussinani/signale.git"},"scripts":{"test":"xo"},"version":"1.4.0","xo":{"space":2}};
+module.exports = {"name":"signale","version":"1.4.0","description":"👋 Hackable console logger","license":"MIT","repository":"klaussinani/signale","author":{"name":"Klaus Sinani","email":"klaussinani@gmail.com","url":"https://klaussinani.github.io"},"maintainers":[{"name":"Mario Sinani","email":"mariosinani@protonmail.ch","url":"https://mariocfhq.github.io"}],"engines":{"node":">=6"},"files":["index.js","signale.js","types.js"],"keywords":["hackable","colorful","console","logger"],"scripts":{"test":"xo"},"dependencies":{"chalk":"^2.3.2","figures":"^2.0.0","pkg-conf":"^2.1.0"},"devDependencies":{"xo":"*"},"options":{"default":{"displayScope":true,"displayBadge":true,"displayDate":false,"displayFilename":false,"displayLabel":true,"displayTimestamp":false,"underlineLabel":true,"underlineMessage":false,"underlinePrefix":false,"underlineSuffix":false,"uppercaseLabel":false}},"xo":{"space":2}};
 
 /***/ }),
 
